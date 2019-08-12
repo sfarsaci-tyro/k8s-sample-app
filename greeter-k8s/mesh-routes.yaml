@@ -1,0 +1,63 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: greeter-app-gateway
+  namespace: greeter-app
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+        - "*"
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: greeter-app
+  namespace: greeter-app
+spec:
+  hosts:
+    - "*"
+  gateways:
+    - greeter-app-gateway
+  http:
+    - match:
+        - uri:
+            exact: /hello
+      route:
+        - destination:
+            port:
+              number: 8080
+            host: greeter-app-service
+    - match:
+        - uri:
+            prefix: /person
+      route:
+        - destination:
+            port:
+              number: 8080
+            host: greeter-app-service
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: greeting-message-provider-app-service
+  namespace: greeter-app
+spec:
+  hosts:
+    - "*"
+  gateways:
+    - greeter-app-gateway
+  http:
+    - match:
+        - uri:
+            exact: /hello-message
+      route:
+        - destination:
+            port:
+              number: 80
+            host: greeting-message-provider-app-service

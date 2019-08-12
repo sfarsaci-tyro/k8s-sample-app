@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/name: greeter-app-deployment
+  name: greeter-app-deployment
+  namespace: greeter-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: greeter-app
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: greeter-app
+        app: greeter-app
+        version: 0.0.5
+      namespace: greeter-app
+      annotations:
+        sidecar.istio.io/inject: "true"
+    spec:
+      containers:
+        - image: greeter-app:0.0.5
+          name: greeter-app
+          ports:
+            - containerPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/name: greeting-message-provider-app-deployment
+  name: greeting-message-provider-app-deployment
+  namespace: greeter-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: greeting-message-provider-app
+  template:
+    metadata:
+      namespace: greeter-app
+      labels:
+        app.kubernetes.io/name: greeting-message-provider-app
+        app: greeting-message-provider-app
+        version: 0.0.4
+      annotations:
+        sidecar.istio.io/inject: "true"
+    spec:
+      containers:
+        - image: greeting-message-provider-app:0.0.4
+          name: greeting-message-provider-app
+          ports:
+            - containerPort: 8080
+---
